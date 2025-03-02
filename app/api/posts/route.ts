@@ -1,10 +1,7 @@
 import Post from "@/database/post.model";
 import User from "@/database/user.model";
-import { authOptions } from "@/lib/auth-options";
-import { connectToDatabase } from "@/lib/mognoose";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { CustomSession } from "@/lib/auth-options";
+import { connectToDatabase } from "@/lib/mognoose";
 
 export async function POST(req: Request) {
   try {
@@ -26,7 +23,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-console.log("Hello");
+console.log("Hello1");
 
     const { searchParams } = new URL(req.url);
     const limitParam = searchParams.get("limit");
