@@ -26,10 +26,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-
-    const session = (await getServerSession(authOptions)) as CustomSession | null;
-
-
+console.log("Hello");
 
     const { searchParams } = new URL(req.url);
     const limitParam = searchParams.get("limit");
