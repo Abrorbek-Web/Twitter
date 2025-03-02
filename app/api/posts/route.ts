@@ -29,14 +29,17 @@ export async function GET(req: Request) {
 
     const session = (await getServerSession(authOptions)) as CustomSession | null;
 
-    if (!session?.user) {
+    if (!session?.user || !session.user._id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const currentUserId = session.user.id;
+    const currentUserId = session.user._id; // `_id` maydonini ishlatamiz
 
     const { searchParams } = new URL(req.url);
-    const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : undefined;
+    const limitParam = searchParams.get("limit");
+
+    // `limit` noto‘g‘ri qiymat bo‘lmasligi uchun xavfsiz tarzda ishlov beramiz
+    const safeLimit = limitParam ? Number(limitParam) || 10 : 10; // Agar noto‘g‘ri qiymat bo‘lsa, 10 dan foydalanamiz
 
     const posts = await Post.find({})
       .populate({
@@ -44,7 +47,7 @@ export async function GET(req: Request) {
         model: User,
         select: "name email profileImage _id username",
       })
-      .limit(limit)
+      .limit(safeLimit) // `limit` har doim `number` turida bo‘ladi
       .sort({ createdAt: -1 });
 
     const filteredPosts = posts.map((post) => ({
@@ -57,9 +60,9 @@ export async function GET(req: Request) {
         profileImage: post.user.profileImage,
         email: post.user.email,
       },
-      likes: post.likes.length,
-      comments: post.comments.length,
-      hasLiked: post.likes.some((like: string) => like.toString() === currentUserId),
+      likes: Array.isArray(post.likes) ? post.likes.length : 0, // `likes` array ekanligini tekshiramiz
+      comments: Array.isArray(post.comments) ? post.comments.length : 0,
+      hasLiked: Array.isArray(post.likes) ? post.likes.some((like: string) => like.toString() === currentUserId) : false,
       _id: post._id,
     }));
 
