@@ -1,30 +1,37 @@
 import Comment from "@/database/comment.model";
-import Post from "@/database/post.model";
-import User from "@/database/user.model";
+import Post from "@/database/post.model"
+import User from "@/database/user.model"
 import { authOptions } from "@/lib/auth-options";
 import { connectToDatabase } from "@/lib/mognoose";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { IPost, IUser, IComment } from "@/types"
 
 export async function GET(req: Request, route: { params: { postId: string } }) {
   try {
     await connectToDatabase();
     const { postId } = route.params;
 
-    const { currentUser }: any = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
+    const currentUser = session?.user as { _id: string } | null;
 
-    const post = await Post.findById(postId).populate({
-      path: "comments",
-      model: Comment,
-      populate: {
-        path: "user",
-        model: User,
-        select: "name email profileImage _id username",
-      },
-      options: { sort: { likes: -1 } },
-    });
+    const post: (IPost & { comments: (IComment & { user: IUser })[] }) | null =
+      await Post.findById(postId).populate({
+        path: "comments",
+        model: Comment,
+        populate: {
+          path: "user",
+          model: User,
+          select: "name email profileImage _id username",
+        },
+        options: { sort: { likes: -1 } },
+      });
 
-    const filteredComments = post.comments.map((item: any) => ({
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    const filteredComments = post.comments.map((item) => ({
       body: item.body,
       createdAt: item.createdAt,
       user: {
@@ -35,7 +42,7 @@ export async function GET(req: Request, route: { params: { postId: string } }) {
         email: item.user.email,
       },
       likes: item.likes.length,
-      hasLiked: item.likes.includes(currentUser._id),
+      hasLiked: currentUser ? item.likes.includes(currentUser._id) : false,
       _id: item._id,
     }));
 

@@ -1,20 +1,22 @@
-import Post from "@/database/post.model";
-import User from "@/database/user.model";
+import Post from "@/database/post.model"
+import User from "@/database/user.model"
 import { authOptions } from "@/lib/auth-options";
 import { connectToDatabase } from "@/lib/mognoose";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { IPost, IUser} from "@/types"
 
 export async function GET(req: Request, route: { params: { userId: string } }) {
   try {
     await connectToDatabase();
 
-    const { currentUser }: any = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
+    const currentUser = session?.user as { _id: string } | null;
 
     const { searchParams } = new URL(req.url);
     const limit = searchParams.get("limit");
 
-    const posts = await Post.find({ user: route.params.userId })
+    const posts: (IPost & { user: IUser })[] = await Post.find({ user: route.params.userId })
       .populate({
         path: "user",
         model: User,
@@ -35,7 +37,7 @@ export async function GET(req: Request, route: { params: { userId: string } }) {
       },
       likes: post.likes.length,
       comments: post.comments.length,
-      hasLiked: post.likes.includes(currentUser._id),
+      hasLiked: currentUser ? post.likes.includes(currentUser._id) : false,
       _id: post._id,
     }));
 
