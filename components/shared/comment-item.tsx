@@ -1,7 +1,7 @@
 "use client";
 
 import { IPost, IUser } from "@/types";
-import React, { useState } from "react";
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { sliceText } from "@/lib/utils";
 import { formatDistanceToNowStrict } from "date-fns";
