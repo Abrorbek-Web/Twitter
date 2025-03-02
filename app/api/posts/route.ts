@@ -29,11 +29,7 @@ export async function GET(req: Request) {
 
     const session = (await getServerSession(authOptions)) as CustomSession | null;
 
-    if (!session?.user || !session.user._id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
-    const currentUserId = session.user._id; // `_id` maydonini ishlatamiz
 
     const { searchParams } = new URL(req.url);
     const limitParam = searchParams.get("limit");
@@ -62,7 +58,7 @@ export async function GET(req: Request) {
       },
       likes: Array.isArray(post.likes) ? post.likes.length : 0, // `likes` array ekanligini tekshiramiz
       comments: Array.isArray(post.comments) ? post.comments.length : 0,
-      hasLiked: Array.isArray(post.likes) ? post.likes.some((like: string) => like.toString() === currentUserId) : false,
+      // hasLiked: Array.isArray(post.likes) ? post.likes.some((like: string) => like.toString() === currentUserId) : false,
       _id: post._id,
     }));
 
