@@ -1,6 +1,4 @@
 "use client";
-
-import { IUser } from "@/types";
 import { signOut, useSession } from "next-auth/react";
 import React from "react";
 import { RiLogoutCircleLine } from "react-icons/ri";
@@ -8,9 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Loader2, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-interface Props {
-  user: IUser;
-}
+// interface Props {
+//   user: IUser;
+// }
 
 const SidebarAccount = () => {
   const { data, status } = useSession();
