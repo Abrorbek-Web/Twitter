@@ -12,9 +12,9 @@ interface Props {
 }
 
 const Layout = async ({ children }: Props) => {
-  const session: any = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session || !session.currentUser) {
     return (
       <div className="container h-screen mx-auto max-w-7xl">
         <Auth />
@@ -25,8 +25,8 @@ const Layout = async ({ children }: Props) => {
   return (
     <div className="lg:container h-screen mx-auto lg:max-w-7xl">
       <div className="flex">
-        <Sidebar user={JSON.parse(JSON.stringify(session.currentUser))} />
-        <div className="flex flex-1 border-x-[1px] border-neutral-800 lg:mx-4 ml-1">
+        <Sidebar user={session.currentUser} />
+        <div className="flex flex-1 border-x border-neutral-800 lg:mx-4 ml-1">
           <div className="w-full">
             <NextTopLoader
               color="#2299DD"
@@ -37,7 +37,7 @@ const Layout = async ({ children }: Props) => {
               showSpinner={false}
               easing="ease"
               speed={200}
-              shadow="0 0 10px #2299DD,0 0 5px #2299DD"
+              shadow="0 0 10px #2299DD, 0 0 5px #2299DD"
             />
             {children}
             <Toaster />

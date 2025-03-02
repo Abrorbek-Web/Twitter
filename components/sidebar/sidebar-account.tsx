@@ -12,7 +12,7 @@ interface Props {
   user: IUser;
 }
 
-const SidebarAccount = ({ user }: Props) => {
+const SidebarAccount = () => {
   const { data, status } = useSession();
 
   if (status == "loading")

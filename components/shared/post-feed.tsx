@@ -19,22 +19,28 @@ const PostFeed = ({ userId, user }: Props) => {
   const getPosts = async () => {
     setIsLoading(true);
     const res = await getUserPosts({ id: userId });
+    
     if (res?.serverError || res?.validationErrors || !res?.data) {
-      return onError("Something went wrong");
-    }
-    if (res.data.failure) {
-      return onError(res.data.failure);
-    }
-    if (res.data.status === 200) {
       setIsLoading(false);
-      res.data.posts && setPosts(res.data.posts);
+      onError("Something went wrong");
+      return;
     }
+    
+    if (res.data.failure) {
+      setIsLoading(false);
+      onError(res.data.failure);
+      return;
+    }
+    
+    if (res.data.status === 200) {
+      setPosts(res.data.posts || []);
+    }
+    
+    setIsLoading(false);
   };
 
   useEffect(() => {
     getPosts();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   return isLoading ? (
