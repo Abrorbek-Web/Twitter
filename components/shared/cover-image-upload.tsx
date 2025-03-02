@@ -22,12 +22,17 @@ const CoverImageUpload = ({ coverImage, onChange }: Props) => {
   );
 
   const handleDrop = useCallback(
-    (files: any) => {
+    (files: File[]) => {
       const file = files[0];
+      if (!file) return;
+
       const reader = new FileReader();
-      reader.onload = (evt: any) => {
-        setImage(evt.target.result);
-        handleChange(evt.target.result);
+      reader.onload = (evt: ProgressEvent<FileReader>) => {
+        if (!evt.target?.result) return;
+
+        const result = evt.target.result as string;
+        setImage(result);
+        handleChange(result);
       };
       reader.readAsDataURL(file);
     },
@@ -59,8 +64,8 @@ const CoverImageUpload = ({ coverImage, onChange }: Props) => {
             alt="Uploaded image"
             style={{ objectFit: "cover" }}
           />
-          <div className="absolute inset-0 flex justify-center items-center">
-            <MdEdit size={24} className={"text-white"} />
+          <div className="absolute inset-0 flex justify-center items-center bg-black/40">
+            <MdEdit size={24} className="text-white" />
           </div>
         </div>
       ) : (

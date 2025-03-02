@@ -12,7 +12,7 @@ interface Props {
 }
 
 const ProfileImageUpload = ({ onChange, profileImage }: Props) => {
-  const [image, setImage] = useState(profileImage);
+  const [image, setImage] = useState<string>(profileImage);
 
   const handleChange = useCallback(
     (coverImage: string) => {
@@ -22,13 +22,17 @@ const ProfileImageUpload = ({ onChange, profileImage }: Props) => {
   );
 
   const handleDrop = useCallback(
-    (files: any) => {
+    (files: File[]) => {
       const file = files[0];
       const reader = new FileReader();
-      reader.onload = (evt: any) => {
-        setImage(evt.target.result);
-        handleChange(evt.target.result);
+
+      reader.onload = (evt: ProgressEvent<FileReader>) => {
+        if (evt.target && typeof evt.target.result === "string") {
+          setImage(evt.target.result);
+          handleChange(evt.target.result);
+        }
       };
+
       reader.readAsDataURL(file);
     },
     [handleChange]
@@ -65,7 +69,7 @@ const ProfileImageUpload = ({ onChange, profileImage }: Props) => {
       ) : (
         <div className="relative -top-20 left-6">
           <div
-            className={`rounded-full transition cursor-pointer relative w-32 h-32 border-4 border-black`}
+            className="rounded-full transition cursor-pointer relative w-32 h-32 border-4 border-black"
           >
             <Image
               fill
@@ -73,7 +77,7 @@ const ProfileImageUpload = ({ onChange, profileImage }: Props) => {
               alt="Avatar"
               src={"/images/placeholder.png"}
             />
-            <div className="absolute inset-0  bg-black/40 rounded-full flex justify-center items-center">
+            <div className="absolute inset-0 bg-black/40 rounded-full flex justify-center items-center">
               <IoMdDownload size={40} className={"text-black"} />
             </div>
           </div>

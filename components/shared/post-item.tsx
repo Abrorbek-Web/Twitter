@@ -1,7 +1,7 @@
 "use client";
 
 import { IPost, IUser } from "@/types";
-import React, { MouseEvent} from "react";
+import React, { MouseEvent } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { sliceText } from "@/lib/utils";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -39,7 +39,7 @@ const PostItem = ({ post, user }: Props) => {
     }
   };
 
-  const onLike = async (e: React.MouseEvent<HTMLDivElement>) => {
+  const onLike = async (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setIsLoading(true);
     let res;
@@ -63,7 +63,7 @@ const PostItem = ({ post, user }: Props) => {
     router.push(`/posts/${post._id}`);
   };
 
-  const goToProfile = (evt: any) => {
+  const goToProfile = (evt: MouseEvent<HTMLDivElement>) => {
     evt.stopPropagation();
     router.push(`/profile/${post.user._id}`);
   };

@@ -4,19 +4,22 @@ import { authOptions } from "@/lib/auth-options";
 import { connectToDatabase } from "@/lib/mognoose";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { CustomSession } from "@/lib/auth-options";
 
 export async function POST(req: Request) {
   try {
     await connectToDatabase();
-
     const { body, userId } = await req.json();
+
+    if (!body || !userId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
 
     const post = await Post.create({ body, user: userId });
 
     return NextResponse.json(post);
   } catch (error) {
-    const result = error as Error;
-    return NextResponse.json({ error: result.message }, { status: 400 });
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
 }
 
@@ -24,10 +27,16 @@ export async function GET(req: Request) {
   try {
     await connectToDatabase();
 
-    const { currentUser }: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as CustomSession | null;
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const currentUserId = session.user.id;
 
     const { searchParams } = new URL(req.url);
-    const limit = searchParams.get("limit");
+    const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : undefined;
 
     const posts = await Post.find({})
       .populate({
@@ -35,7 +44,7 @@ export async function GET(req: Request) {
         model: User,
         select: "name email profileImage _id username",
       })
-      .limit(Number(limit))
+      .limit(limit)
       .sort({ createdAt: -1 });
 
     const filteredPosts = posts.map((post) => ({
@@ -50,14 +59,13 @@ export async function GET(req: Request) {
       },
       likes: post.likes.length,
       comments: post.comments.length,
-      hasLiked: post.likes.includes(currentUser._id),
+      hasLiked: post.likes.some((like: string) => like.toString() === currentUserId),
       _id: post._id,
     }));
 
     return NextResponse.json(filteredPosts);
   } catch (error) {
-    const result = error as Error;
-    return NextResponse.json({ error: result.message }, { status: 400 });
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
 }
 
@@ -66,11 +74,18 @@ export async function DELETE(req: Request) {
     await connectToDatabase();
     const { postId } = await req.json();
 
-    await Post.findByIdAndDelete(postId);
+    if (!postId) {
+      return NextResponse.json({ error: "Post ID is required" }, { status: 400 });
+    }
+
+    const deletedPost = await Post.findByIdAndDelete(postId);
+    
+    if (!deletedPost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ message: "Post deleted successfully" });
   } catch (error) {
-    const result = error as Error;
-    return NextResponse.json({ error: result.message }, { status: 400 });
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
 }

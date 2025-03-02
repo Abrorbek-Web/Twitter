@@ -28,10 +28,12 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
     setIsLoading(true);
     const res = await follow({ userId: user._id, currentUserId: userId });
     if (res?.serverError || res?.validationErrors || !res?.data) {
-      return onError("Something went wrong");
+      onError("Something went wrong");
+      return;
     }
     if (res.data.failure) {
-      return onError(res.data.failure);
+      onError(res.data.failure);
+      return;
     }
     if (res.data.status === 200) {
       setIsLoading(false);
@@ -42,10 +44,12 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
     setIsLoading(true);
     const res = await unfollow({ userId: user._id, currentUserId: userId });
     if (res?.serverError || res?.validationErrors || !res?.data) {
-      return onError("Something went wrong");
+      onError("Something went wrong");
+      return;
     }
     if (res.data.failure) {
-      return onError(res.data.failure);
+      onError(res.data.failure);
+      return;
     }
     if (res.data.status === 200) {
       setIsLoading(false);
@@ -56,21 +60,26 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
     setIsFetching(true);
     const res = await getFollowUser({ userId, state: type });
     if (res?.serverError || res?.validationErrors || !res?.data) {
-      return onError("Something went wrong");
+      onError("Something went wrong");
+      return [];
     }
     if (res.data.failure) {
-      return onError(res.data.failure);
+      onError(res.data.failure);
+      return [];
     }
     if (res.data.status === 200) {
       setIsFetching(false);
       return res.data.users;
     }
+    return [];
   };
 
   const openFollowModal = async () => {
     setOpen(true);
     const data = await onFollowUser(user._id, "following");
-    data && setFollowing(data);
+    if (data) {
+      setFollowing(data);
+    }
   };
 
   const onFollowing = async () => {
@@ -78,7 +87,9 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 
     if (following.length === 0) {
       const data = await onFollowUser(user._id, "following");
-      data && setFollowing(data);
+      if (data) {
+        setFollowing(data);
+      }
     }
   };
 
@@ -87,7 +98,9 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 
     if (followers.length === 0) {
       const data = await onFollowUser(user._id, "followers");
-      data && setFollowers(data);
+      if (data) {
+        setFollowers(data);
+      }
     }
   };
 
@@ -141,7 +154,7 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
               <div className="flex flex-row items-center gap-2 mt-4 text-neutral-500">
                 <BiCalendar size={24} />
                 <p>
-                  Joined {formatDistanceToNowStrict(new Date(user.createdAt))}{" "}
+                  Joined {formatDistanceToNowStrict(new Date(user.createdAt))}
                   ago
                 </p>
               </div>

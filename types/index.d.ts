@@ -6,10 +6,25 @@ export interface QueryProps {
   value?: string | null;
 }
 
+export interface IComment {
+  _id: string;
+  body: string;
+  createdAt: string;
+  likes: number;
+  hasLiked: boolean;
+  user: {
+    _id: string;
+    name: string;
+    username?: string;
+    email: string;
+    profileImage?: string;
+  };
+}
+
 export interface IUser {
   createdAt: Date;
   username: string;
-  email: string;
+  email: string;  
   name: string;
   profileImage: string;
   coverImage: string;

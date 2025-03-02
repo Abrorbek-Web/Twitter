@@ -3,7 +3,7 @@
 import { IUser } from "@/types";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, MouseEvent } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { sliceText } from "@/lib/utils";
 import Button from "../ui/button";
@@ -25,69 +25,67 @@ const FollowUser = ({ user, setFollowing }: Props) => {
 
   const onFollow = async () => {
     setIsLoading(true);
-    const res = await follow({
-      userId: user._id,
-      currentUserId: session?.currentUser?._id!,
-    });
+    const currentUserId = session?.currentUser?._id ?? "";
+
+    if (!currentUserId) return onError("User not authenticated");
+
+    const res = await follow({ userId: user._id, currentUserId });
+
     if (res?.serverError || res?.validationErrors || !res?.data) {
       return onError("Something went wrong");
     }
     if (res.data.failure) {
       return onError(res.data.failure);
     }
+
     if (res.data.status === 200) {
       setIsLoading(false);
-      if (userId === session?.currentUser?._id) {
+      if (userId === currentUserId) {
         setFollowing((prev) => [
           ...prev,
           {
             ...user,
-            followers: [
-              ...user.followers.filter((f) => f !== undefined),
-              session.currentUser?._id as string,
-            ],
+            followers: [...(user.followers || []), currentUserId],
           },
         ]);
       }
       setProfile((prev) => ({
         ...prev,
-        followers: [
-          ...(prev.followers.filter((f) => f !== undefined) as string[]),
-          session?.currentUser?._id as string,
-        ],
+        followers: [...(prev.followers || []), currentUserId],
       }));
     }
   };
 
   const onUnfollow = async () => {
     setIsLoading(true);
-    const res = await unfollow({
-      userId: user._id,
-      currentUserId: session?.currentUser?._id!,
-    });
+    const currentUserId = session?.currentUser?._id ?? "";
+
+    if (!currentUserId) return onError("User not authenticated");
+
+    const res = await unfollow({ userId: user._id, currentUserId });
+
     if (res?.serverError || res?.validationErrors || !res?.data) {
       return onError("Something went wrong");
     }
     if (res.data.failure) {
       return onError(res.data.failure);
     }
+
     if (res.data.status === 200) {
       setIsLoading(false);
-      if (userId === session?.currentUser?._id) {
+      if (userId === currentUserId) {
         setFollowing((prev) =>
           prev.filter((following) => following._id !== user._id)
         );
       }
       setProfile((prev) => ({
         ...prev,
-        followers: prev.followers.filter(
-          (follower) => follower !== session?.currentUser?._id
-        ),
+        followers: prev.followers?.filter((f) => f !== currentUserId) || [],
       }));
     }
   };
 
-  const goToProfile = (evt: any) => {
+  const goToProfile = (evt: MouseEvent<HTMLDivElement>) => {
     evt.stopPropagation();
     router.push(`/profile/${user._id}`);
   };
@@ -113,7 +111,7 @@ const FollowUser = ({ user, setFollowing }: Props) => {
       </div>
 
       {profile._id !== session?.currentUser?._id ? (
-        profile.followers.includes(session?.currentUser?._id!) ? (
+        profile.followers?.includes(session?.currentUser?._id ?? "") ? (
           <Button
             label={"Unfollow"}
             outline
