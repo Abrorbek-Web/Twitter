@@ -1,11 +1,11 @@
 import Comment from "@/database/comment.model";
-import Post from "@/database/post.model"
-import User from "@/database/user.model"
+import Post from "@/database/post.model";
+import User from "@/database/user.model";
 import { authOptions } from "@/lib/auth-options";
 import { connectToDatabase } from "@/lib/mognoose";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { IPost, IUser, IComment } from "@/types"
+import { IPost, IUser, IComment } from "@/types";
 
 export async function GET(req: Request, route: { params: { postId: string } }) {
   try {
@@ -41,8 +41,8 @@ export async function GET(req: Request, route: { params: { postId: string } }) {
         profileImage: item.user.profileImage,
         email: item.user.email,
       },
-      likes: item.likes.length,
-      hasLiked: currentUser ? item.likes.includes(currentUser._id) : false,
+      likes: Array.isArray(item.likes) ? item.likes.length : 0, // ✅ To‘g‘ri tekshirish
+      hasLiked: currentUser ? Array.isArray(item.likes) && item.likes.includes(currentUser._id) : false, // ✅ To‘g‘ri tekshirish
       _id: item._id,
     }));
 
