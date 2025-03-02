@@ -5,13 +5,13 @@ import { RiLogoutCircleLine } from "react-icons/ri";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Loader2, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import {IUser} from "@/types"
+// import {IUser} from "@/types"
 
-interface Props {
-  user: IUser;
-}
+// interface Props {
+//   user: IUser;
+// }
 
-const SidebarAccount = ({user}: Props) => {
+const SidebarAccount = () => {
   const { data, status } = useSession();
 
   if (status == "loading")

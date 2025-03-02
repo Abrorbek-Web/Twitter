@@ -38,7 +38,7 @@ const Sidebar = ({ user }: { user: IUser }) => {
         <SidebarPostButton />
       </div>
 
-      <SidebarAccount user={user} />
+      <SidebarAccount />
     </section>
   );
 };
